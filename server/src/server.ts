@@ -2,7 +2,7 @@ import express from 'express';
 import path from 'node:path';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
-import { json } from 'body-parser';
+import bodyParser from 'body-parser'; // Use default import for body-parser
 import cors from 'cors';
 import db from './config/connection.js';
 import { typeDefs, resolvers } from './schema/index.js'; // Import from index.ts
@@ -23,7 +23,7 @@ const server = new ApolloServer({
   app.use(
     '/graphql',
     cors(), // Enable CORS for cross-origin requests
-    json(), // Parse incoming JSON requests
+    bodyParser.json(), // Use bodyParser.json() instead of json
     expressMiddleware(server, {
       context: async ({ req }) => {
         const authHeader = req.headers.authorization || '';
@@ -48,7 +48,7 @@ const server = new ApolloServer({
 
   // Middleware for parsing requests
   app.use(express.urlencoded({ extended: true }));
-  app.use(express.json());
+  app.use(bodyParser.json()); // Update this to use bodyParser.json()
 
   // Serve static assets in production
   if (process.env.NODE_ENV === 'production') {
