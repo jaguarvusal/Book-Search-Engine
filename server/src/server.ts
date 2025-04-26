@@ -2,10 +2,10 @@ import express from 'express';
 import path from 'node:path';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
-import bodyParser from 'body-parser'; // Use default import for body-parser
+import bodyParser from 'body-parser';
 import cors from 'cors';
 import db from './config/connection.js';
-import { typeDefs, resolvers } from './schema/index.js'; // Import from index.ts
+import { typeDefs, resolvers } from './schema/index.js';
 import { authenticateToken } from './services/auth.js';
 
 const app = express();
@@ -22,8 +22,8 @@ const server = new ApolloServer({
 
   app.use(
     '/graphql',
-    cors(), // Enable CORS for cross-origin requests
-    bodyParser.json(), // Use bodyParser.json() instead of json
+    cors(),
+    bodyParser.json(),
     expressMiddleware(server, {
       context: async ({ req }) => {
         const authHeader = req.headers.authorization || '';
@@ -41,18 +41,25 @@ const server = new ApolloServer({
           }
         }
 
-        return { user }; // Add user to the context
+        return { user };
       },
     })
   );
 
   // Middleware for parsing requests
   app.use(express.urlencoded({ extended: true }));
-  app.use(bodyParser.json()); // Update this to use bodyParser.json()
+  app.use(bodyParser.json());
 
   // Serve static assets in production
   if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, '../client/build')));
+    const __dirname = path.dirname(new URL(import.meta.url).pathname); // Needed in ES module context
+    const clientDistPath = path.join(__dirname, '../client/dist');
+
+    app.use(express.static(clientDistPath));
+
+    app.get('*', (_req, res) => {
+      res.sendFile(path.join(clientDistPath, 'index.html'));
+    });
   }
 
   // Connect to the database and start the server
