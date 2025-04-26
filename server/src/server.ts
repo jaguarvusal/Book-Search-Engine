@@ -55,16 +55,16 @@ const server = new ApolloServer({
   app.use(express.urlencoded({ extended: true }));
   app.use(bodyParser.json());
 
-  // Serve static assets in production
-  if (process.env.NODE_ENV === 'production') {
-    const clientDistPath = path.resolve(__dirname, '../client/dist');
+ // Serve static assets in production
+if (process.env.NODE_ENV === 'production') {
+  const clientDistPath = path.resolve(__dirname, '../../client/dist'); // Corrected path
 
-    app.use(express.static(clientDistPath));
+  app.use(express.static(clientDistPath));
 
-    app.get('*', (_req, res) => {
-      res.sendFile(path.resolve(clientDistPath, 'index.html'));
-    });
-  }
+  app.get('*', (_req, res) => {
+    res.sendFile(path.resolve(clientDistPath, 'index.html'));
+  });
+}
 
   // Connect to the database and start the server
   db.once('open', () => {
