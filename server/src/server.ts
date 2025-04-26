@@ -1,5 +1,6 @@
 import express from 'express';
 import path from 'node:path';
+import { fileURLToPath } from 'url';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
 import bodyParser from 'body-parser';
@@ -10,6 +11,10 @@ import { authenticateToken } from './services/auth.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// ES module-compatible __dirname workaround
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Apollo Server setup
 const server = new ApolloServer({
@@ -46,19 +51,18 @@ const server = new ApolloServer({
     })
   );
 
-  // Middleware for parsing requests
+  // Middleware for parsing form data
   app.use(express.urlencoded({ extended: true }));
   app.use(bodyParser.json());
 
   // Serve static assets in production
   if (process.env.NODE_ENV === 'production') {
-    const __dirname = path.dirname(new URL(import.meta.url).pathname); // Needed in ES module context
-    const clientDistPath = path.join(__dirname, '../client/dist');
+    const clientDistPath = path.resolve(__dirname, '../client/dist');
 
     app.use(express.static(clientDistPath));
 
     app.get('*', (_req, res) => {
-      res.sendFile(path.join(clientDistPath, 'index.html'));
+      res.sendFile(path.resolve(clientDistPath, 'index.html'));
     });
   }
 
